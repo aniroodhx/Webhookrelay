@@ -19,8 +19,7 @@ public class WebhookEvent {
     @Column(nullable = false)
     private String eventType;
 
-    @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "text")
     private String payload; // JSON string
 
     private Instant createdAt = Instant.now();
