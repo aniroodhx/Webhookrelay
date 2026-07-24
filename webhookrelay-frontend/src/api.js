@@ -44,6 +44,10 @@ export const api = {
 
   listDeliveries: () => request('/api/deliveries'),
 
+  // Clears all deliveries + events (subscriptions are kept) so the dashboard
+  // can be reset to a clean slate between demo walkthroughs.
+  clearDeliveries: () => request('/api/deliveries', { method: 'DELETE' }),
+
   resetDemoScenario: (scenario) =>
     request(`/api/demo/receiver/${scenario}`, { method: 'DELETE' }),
 };

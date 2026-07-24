@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { useRelayData } from '../RelayDataContext';
 import { DeliveriesPanel } from '../components/DeliveriesPanel';
 import { BACKOFF_STAGES_SECONDS } from '../deliveryHelpers';
+import { api } from '../api';
 
 const LADDER_LABELS = [...BACKOFF_STAGES_SECONDS.map((s) => `${s}s`), 'Dead letter'];
 
@@ -30,10 +32,38 @@ export function DeliveriesPage() {
   const { deliveries, deliveriesError } = useRelayData();
   const highlight = findHighlightDelivery(deliveries);
   const activeIndex = activeStageIndex(highlight);
+  const [clearing, setClearing] = useState(false);
+
+  const handleClear = async () => {
+    if (!window.confirm('Clear all deliveries and events? Subscriptions are kept.')) {
+      return;
+    }
+    setClearing(true);
+    try {
+      await api.clearDeliveries();
+      // The 1.5s poll picks up the now-empty list on its next tick.
+    } catch {
+      // Non-fatal for a demo reset — the poll will still reflect reality.
+    } finally {
+      setClearing(false);
+    }
+  };
 
   return (
     <div>
-      <h1>Deliveries</h1>
+      <div className="page-title-row">
+        <h1>Deliveries</h1>
+        {deliveries.length > 0 && (
+          <button
+            type="button"
+            className="link-button"
+            onClick={handleClear}
+            disabled={clearing}
+          >
+            {clearing ? 'Clearing…' : 'Clear all'}
+          </button>
+        )}
+      </div>
       <p className="page-subtitle">
         Step 3: this is where the retry engine becomes visible.
       </p>

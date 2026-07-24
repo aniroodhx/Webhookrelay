@@ -2,7 +2,9 @@ package com.anirudh.webhookrelay.controller;
 
 import com.anirudh.webhookrelay.model.DeliveryAttempt;
 import com.anirudh.webhookrelay.repository.DeliveryAttemptRepository;
+import com.anirudh.webhookrelay.repository.WebhookEventRepository;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
@@ -15,9 +17,12 @@ import java.util.stream.Collectors;
 public class DeliveryStatusController {
 
     private final DeliveryAttemptRepository deliveryAttemptRepository;
+    private final WebhookEventRepository eventRepository;
 
-    public DeliveryStatusController(DeliveryAttemptRepository deliveryAttemptRepository) {
+    public DeliveryStatusController(DeliveryAttemptRepository deliveryAttemptRepository,
+                                    WebhookEventRepository eventRepository) {
         this.deliveryAttemptRepository = deliveryAttemptRepository;
+        this.eventRepository = eventRepository;
     }
 
     /** Lets a subscriber (or an internal dashboard) check delivery status/history for an event. */
@@ -26,6 +31,22 @@ public class DeliveryStatusController {
         return deliveryAttemptRepository.findAll().stream()
                 .map(DeliveryStatusView::from)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Clears all delivery attempts and their events, leaving subscriptions
+     * intact. This is a demo convenience so the dashboard can be reset to a
+     * clean slate between walkthroughs without wiping the whole database.
+     *
+     * Deletes attempts before events because a delivery_attempt row has a
+     * foreign key to webhook_event — removing events first would violate it.
+     */
+    @DeleteMapping
+    @Transactional
+    public ResponseEntity<Void> clearAll() {
+        deliveryAttemptRepository.deleteAllInBatch();
+        eventRepository.deleteAllInBatch();
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}")
