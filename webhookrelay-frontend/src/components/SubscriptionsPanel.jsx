@@ -7,8 +7,19 @@ const DEMO_SCENARIOS = [
   { label: 'Fails until dead-lettered', failTimes: 99 },
 ];
 
-// Builds a targetUrl pointing at the backend's own demo receiver, so a
-// subscription can be created without standing up a real external service.
+// Common event types offered as a dropdown. It's still a free-text field
+// (via datalist), so a custom type can be typed — this just makes the
+// common ones one click away and prevents typos that would stop an event
+// from matching its subscription.
+const COMMON_EVENT_TYPES = [
+  'order.created',
+  'payment.failed',
+  'user.signup',
+  'invoice.paid',
+  'subscription.cancelled',
+];
+
+
 function demoTargetUrl(scenarioId, failTimes) {
   return `${api.baseUrl}/api/demo/receiver/${scenarioId}?failTimes=${failTimes}`;
 }
@@ -62,11 +73,17 @@ export function SubscriptionsPanel({ subscriptions, onChanged }) {
         <label>
           Event type
           <input
+            list="subscription-event-types"
             value={eventType}
             onChange={(e) => setEventType(e.target.value)}
             placeholder="order.created"
             required
           />
+          <datalist id="subscription-event-types">
+            {COMMON_EVENT_TYPES.map((t) => (
+              <option key={t} value={t} />
+            ))}
+          </datalist>
         </label>
 
         <fieldset className="mode-toggle">

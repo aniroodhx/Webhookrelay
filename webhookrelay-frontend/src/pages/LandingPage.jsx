@@ -77,8 +77,14 @@ export function LandingPage() {
           <Link to="/app/dashboard" className="cta-primary">
             Launch Dashboard
           </Link>
-          {/* GitHub link intentionally omitted until this is pushed to a
-              real repo — a dead link is worse than no link. */}
+          <a
+            href="https://github.com/aniroodhx/Webhookrelay"
+            className="cta-link"
+            target="_blank"
+            rel="noreferrer"
+          >
+            GitHub
+          </a>
           <Link to="/architecture" className="cta-link">
             Architecture
           </Link>
